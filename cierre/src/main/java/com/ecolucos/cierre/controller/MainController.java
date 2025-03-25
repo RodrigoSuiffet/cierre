@@ -1,28 +1,23 @@
 package com.ecolucos.cierre.controller;
 
 import com.ecolucos.cierre.entities.Inicial;
-import org.springframework.context.annotation.Bean;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.cors.CorsConfiguration;
-import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
-import java.util.Arrays;
-@CrossOrigin("http://localhost:3000")
 @RestController
 public class MainController {
 
     @GetMapping("/inicial/{shiftId}")
-    public float getShift(@PathVariable String shiftId) {
+    public Inicial getShift(@PathVariable String shiftId) {
         switch (shiftId)
         {
             case "mañana":
-                return 100;
+                return new Inicial(100);
             case "tarde":
-                return 200;
+                return new Inicial(200);
             case "noche":
-                return 300;
+                return new Inicial(300);
         }
-        return 0;
+        return new Inicial(0);
     }
 
     @PostMapping("/sendCaja")
