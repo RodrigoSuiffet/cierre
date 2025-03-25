@@ -9,7 +9,7 @@
 	</parent>
 	<groupId>com.ecolucos</groupId>
 	<artifactId>cierre</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
+	<version>0.0.5-SNAPSHOT</version>
 	<name>cierre</name>
 	<description>Demo project for Spring Boot</description>
 	<url/>
