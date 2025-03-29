@@ -9,7 +9,7 @@
 	</parent>
 	<groupId>com.ecolucos</groupId>
 	<artifactId>cierre</artifactId>
-	<version>0.0.5-SNAPSHOT</version>
+	<version>0.0.6-SNAPSHOT</version>
 	<name>cierre</name>
 	<description>Demo project for Spring Boot</description>
 	<url/>
@@ -29,12 +29,10 @@
 		<java.version>17</java.version>
 	</properties>
 	<dependencies>
-		<!--
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-data-jpa</artifactId>
 		</dependency>
-		-->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-web</artifactId>
@@ -48,6 +46,11 @@
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-test</artifactId>
 			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.projectlombok</groupId>
+			<artifactId>lombok</artifactId>
+			<scope>provided</scope>
 		</dependency>
 	</dependencies>
 	<build>
