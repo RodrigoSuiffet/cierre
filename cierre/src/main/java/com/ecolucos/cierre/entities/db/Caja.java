@@ -1,8 +1,6 @@
 package com.ecolucos.cierre.entities;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -13,8 +11,10 @@ import java.sql.Timestamp;
 @Data
 @NoArgsConstructor
 public class Caja {
+
     @Id
-    private int id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private long id;
     private String inicial;
     private String recuento;
     private Timestamp fecha;
