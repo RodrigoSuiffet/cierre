@@ -1,8 +1,9 @@
 package com.ecolucos.cierre.service;
 
-
-import com.ecolucos.cierre.entities.Attachment;
-//import com.ecolucos.cierre.repository.AttachmentRepository;
+import com.ecolucos.cierre.entities.db.Attachment;
+import com.ecolucos.cierre.entities.db.Caja;
+import com.ecolucos.cierre.repository.AttachmentRepository;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -14,17 +15,16 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.UUID;
 
 @Service
+@Slf4j
 public class FileStorageService {
 
     private final Path fileStorageLocation;
 
-    //@Autowired
-   // private AttachmentRepository attachmentRepository;
+    @Autowired
+    private AttachmentRepository attachmentRepository;
 
     @Autowired
     public FileStorageService(@Value("${file.upload-dir:./uploads}") String uploadDir) {
@@ -39,13 +39,9 @@ public class FileStorageService {
     }
 
     /**
-     * Store a single file and return the saved attachment entity
+     * Store a file and associate it with a cash register
      */
-    public Attachment storeFile(MultipartFile file) throws IOException {
-        if (file.isEmpty()) {
-            throw new RuntimeException("Failed to store empty file");
-        }
-
+    public Attachment storeFile(MultipartFile file, Caja caja) throws IOException {
         // Normalize file name
         String originalFileName = StringUtils.cleanPath(file.getOriginalFilename());
 
@@ -55,11 +51,20 @@ public class FileStorageService {
         }
 
         // Generate a unique file name to prevent duplicates
-        String uniqueFileName = UUID.randomUUID().toString() + "_" + originalFileName;
+        String uniqueFileName = UUID.randomUUID() + "_" + originalFileName;
+
+        // Create a subfolder for this cash register
+        String cajaFolder = "caja_" + caja.getId();
+        Path cajaPath = this.fileStorageLocation.resolve(cajaFolder);
+        if (!Files.exists(cajaPath)) {
+            Files.createDirectories(cajaPath);
+        }
 
         // Copy file to the target location (replacing existing file with the same name)
-        Path targetLocation = this.fileStorageLocation.resolve(uniqueFileName);
+        Path targetLocation = cajaPath.resolve(uniqueFileName);
         Files.copy(file.getInputStream(), targetLocation, StandardCopyOption.REPLACE_EXISTING);
+
+        log.info("File stored successfully: {} for cash register ID: {}", targetLocation, caja.getId());
 
         // Create and save an attachment entity
         Attachment attachment = new Attachment();
@@ -67,35 +72,32 @@ public class FileStorageService {
         attachment.setStoredFileName(uniqueFileName);
         attachment.setFileType(file.getContentType());
         attachment.setSize(file.getSize());
+        attachment.setCaja(caja);
 
-        return attachment;//attachmentRepository.save(attachment);
+        return attachmentRepository.save(attachment);
     }
 
     /**
-     * Store multiple files and return a list of saved attachment entities
+     * Legacy method without cajaId for backward compatibility
      */
-    public List<Attachment> storeFiles(MultipartFile[] files) throws IOException {
-        List<Attachment> savedAttachments = new ArrayList<>();
+    public Attachment storeFile(MultipartFile file) throws IOException {
+        // For backward compatibility, we'll use a default folder
+        String originalFileName = StringUtils.cleanPath(file.getOriginalFilename());
 
-        for (MultipartFile file : files) {
-            if (!file.isEmpty()) {
-                savedAttachments.add(storeFile(file));
-            }
+        if (originalFileName.contains("..")) {
+            throw new RuntimeException("Filename contains invalid path sequence " + originalFileName);
         }
 
-        return savedAttachments;
+        String uniqueFileName = UUID.randomUUID().toString() + "_" + originalFileName;
+        Path targetLocation = this.fileStorageLocation.resolve(uniqueFileName);
+        Files.copy(file.getInputStream(), targetLocation, StandardCopyOption.REPLACE_EXISTING);
+
+        Attachment attachment = new Attachment();
+        attachment.setFileName(originalFileName);
+        attachment.setStoredFileName(uniqueFileName);
+        attachment.setFileType(file.getContentType());
+        attachment.setSize(file.getSize());
+
+        return attachmentRepository.save(attachment);
     }
-
-    /**
-     * Get the file path for a specific attachment
-     */
-    /*
-    public Path getFilePath(Long attachmentId) {
-        Attachment attachment = attachmentRepository.findById(attachmentId)
-                .orElseThrow(() -> new RuntimeException("Attachment not found with id " + attachmentId));
-
-        return this.fileStorageLocation.resolve(attachment.getStoredFileName());
-    }
-
-     */
 }

@@ -1,27 +1,21 @@
 package com.ecolucos.cierre.util;
 
 import com.ecolucos.cierre.entities.DTO.CajaDTO;
+import com.ecolucos.cierre.entities.DTO.ExpenseDTO;
 import com.ecolucos.cierre.entities.db.Caja;
+import com.ecolucos.cierre.entities.db.Gasto;
 import org.springframework.stereotype.Component;
 
 @Component
-public class CajaDTOMapper {
+public class GastosDTOMapper {
 
-    public Caja cajaDTOToCaja(CajaDTO submission) {
+    public Gasto expenseDTOToGasto(ExpenseDTO submission) {
         // Convert the DTO to an entity
-        Caja caja = new Caja();
-        caja.setTurno(submission.getShift());
-        caja.setTotal(String.valueOf(submission.getTotal()));
-        caja.setTotaltarjeta(String.valueOf(submission.getCardTotal()));
-        caja.setCierretarjeta(String.valueOf(submission.getCardClose()));
-        caja.setPropina(String.valueOf(submission.getTips()));
-        caja.setDescuadretarjeta(String.valueOf(submission.getCardDiscrepancy()));
-        caja.setInicial(String.valueOf(submission.getInitialValue()));
-        caja.setVentas(String.valueOf(submission.getSales()));
-        caja.setIngreso(String.valueOf(submission.getCashIncome()));
-        caja.setGastos(String.valueOf(submission.getTotalExpenses()));
-        caja.setRecuento(String.valueOf(submission.getRecuento()));
-        caja.setDescuadre(String.valueOf(submission.getDiscrepancy()));
-        return caja;
+        Gasto gasto = new Gasto();
+        gasto.setType(submission.getType());
+        gasto.setAmount(submission.getAmount());
+        gasto.setDetails(submission.getDetails());
+
+        return gasto;
     }
 }

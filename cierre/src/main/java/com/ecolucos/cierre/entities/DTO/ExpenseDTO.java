@@ -1,4 +1,4 @@
-package com.ecolucos.cierre.DTO;
+package com.ecolucos.cierre.entities.DTO;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

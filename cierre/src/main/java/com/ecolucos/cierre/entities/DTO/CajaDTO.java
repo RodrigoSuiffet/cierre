@@ -1,4 +1,4 @@
-package com.ecolucos.cierre.DTO;
+package com.ecolucos.cierre.entities.DTO;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -12,7 +12,7 @@ import java.util.List;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class CashRegisterSubmissionDTO {
+public class CajaDTO {
     private String shift;
     private double total;
     private GastosDTO gastos;

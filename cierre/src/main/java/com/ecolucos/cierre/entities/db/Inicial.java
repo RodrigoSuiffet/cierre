@@ -1,4 +1,4 @@
-package com.ecolucos.cierre.entities;
+package com.ecolucos.cierre.entities.db;
 
 import lombok.Data;
 

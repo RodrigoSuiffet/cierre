@@ -1,30 +1,41 @@
 package com.ecolucos.cierre.service;
 
-import com.ecolucos.cierre.DTO.CashRegisterSubmissionDTO;
-import com.ecolucos.cierre.entities.Inicial;
+import com.ecolucos.cierre.entities.DTO.CajaDTO;
+import com.ecolucos.cierre.entities.DTO.ExpenseDTO;
+import com.ecolucos.cierre.entities.db.Gasto;
+import com.ecolucos.cierre.entities.db.Inicial;
 import com.ecolucos.cierre.repository.CajaRepository;
-import com.ecolucos.cierre.entities.Caja;
+import com.ecolucos.cierre.entities.db.Caja;
 
+import com.ecolucos.cierre.repository.GastoRepository;
+import com.ecolucos.cierre.util.CajaDTOMapper;
+import com.ecolucos.cierre.util.GastosDTOMapper;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
-import java.util.UUID;
+import org.springframework.transaction.annotation.Transactional;
+import java.util.Optional;
 
+
+@Slf4j
 @Service
 public class CajaService {
 
     @Autowired
     private CajaRepository cajaRepository;
+    @Autowired
+    private GastoRepository gastoRepository;
 
     @Value("${file.upload-dir:./uploads}")
     private String uploadDir;
+
+    @Autowired
+    private CajaDTOMapper cajaDTOMapper;
+
+    @Autowired
+    private GastosDTOMapper gastosDTOMapper;
 
 
     public Inicial getInicial (String shiftId) {
@@ -34,45 +45,34 @@ public class CajaService {
 
     }
 
-    /**
-     * Save the CajaCierre entity to the database
-     */
-    public Caja saveCajaCierre(CashRegisterSubmissionDTO cajaCierre) {
-        // You might want to add validation or business logic here
-        // Convert DTO to entity
-        Caja caja = new Caja();
-        return cajaRepository.save(caja);
-    }
+    @Transactional
+    public Caja saveCajaCierre(CajaDTO submission) {
+        Caja caja = cajaDTOMapper.cajaDTOToCaja(submission);
 
-    /**
-     * Save an attachment file and return its ID
-     */
-    public Long saveAttachment(MultipartFile file) throws IOException {
-        // Create the upload directory if it doesn't exist
-        Path uploadPath = Paths.get(uploadDir);
-        if (!Files.exists(uploadPath)) {
-            Files.createDirectories(uploadPath);
+        // Save the entity
+        caja = cajaRepository.save(caja);
+
+        // Save expenses
+        if (submission.getGastos() != null && submission.getGastos().getExpenses() != null) {
+            for (ExpenseDTO gasto : submission.getGastos().getExpenses()) {
+                Gasto gastoDB = gastosDTOMapper.expenseDTOToGasto(gasto);
+                gastoDB.setCaja(caja);
+                gastoRepository.save(gastoDB);
+            };
+
         }
+        log.info("Saved cash register with ID: {}", caja.getId());
 
-        // Generate a unique filename
-        String filename = UUID.randomUUID().toString() + "_" + file.getOriginalFilename();
-        Path filePath = uploadPath.resolve(filename);
-
-        // Copy the file to the upload directory
-        Files.copy(file.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
-
-        // In a real application, you would save the file information to a database
-        // and return the generated ID
-        // For this example, we'll just return a random ID
-        return (long) (Math.random() * 10000);
+        return caja;
     }
 
     /**
-     * Retrieve an attachment by ID
+     * Get a cash register by its ID
      */
-    public Path getAttachmentPath(Long id) {
-        // In a real application, you would lookup the file path from the database
-        // For this example, we'll just return null
-        return null;
+    public Caja getCajaById(Long id) {
+        Optional<Caja> cajaOpt = cajaRepository.findById(id);
+        return cajaOpt.orElse(null);
     }
+
+
 }
