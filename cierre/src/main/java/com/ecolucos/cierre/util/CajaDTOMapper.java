@@ -5,6 +5,7 @@ import com.ecolucos.cierre.entities.DTO.CajaDTO;
 import com.ecolucos.cierre.entities.db.Caja;
 import org.springframework.stereotype.Component;
 
+import java.sql.Timestamp;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -26,6 +27,7 @@ public class CajaDTOMapper {
         caja.setTotalGastos(String.valueOf(submission.getTotalExpenses()));
         caja.setRecuento(String.valueOf(submission.getRecuento()));
         caja.setDescuadre(String.valueOf(submission.getDiscrepancy()));
+        caja.setFecha(new Timestamp(System.currentTimeMillis()));
         return caja;
     }
 }
